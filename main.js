@@ -63,11 +63,11 @@ function showInPopup(clicked){
                         <div class="box-body col-md-6">
                         <h4><strong>${data.tagline}</strong></h4>
                             <ul class="list-group">
-                                <li class="list-group-item "><strong>Genre:</strong>${genres = data.genres.map(genre => genre.name)}</li>
-                                <li class="list-group-item "><strong>Released:</strong>${data.release_date}</li>
-                                <li class="list-group-item "><strong>Popularity:</strong>${data.popularity}</li>
-                                <li class="list-group-item "><strong>Rating:</strong>${data.vote_average}</li>
-                                <li class="list-group-item "><strong>Runtime</strong>${data.runtime}</li>
+                                <li class="list-group-item "><strong>Genre: </strong>${genres = data.genres.map(genre => genre.name)}</li>
+                                <li class="list-group-item "><strong>Released: </strong>${data.release_date}</li>
+                                <li class="list-group-item "><strong>Popularity: </strong>${data.popularity}</li>
+                                <li class="list-group-item "><strong>Rating: </strong>${data.vote_average}</li>
+                                <li class="list-group-item "><strong>Runtime: </strong>${data.runtime}</li>
                             </ul>
                         </div>
                         <div class="col-md-12">
@@ -77,6 +77,7 @@ function showInPopup(clicked){
                         <div class="box-footer col-md-12">
                             <a href="http://imdb.com/title/${data.imdb_id}"  class="btn btn-primary" target="_blank">View in IMDB</a>
                             <a href="${trailerSrc}" class="btn btn-primary" target="_blank">View Trailer</a>
+                            <a href="javascript:;" class="btn btn-primary" data-id="${movieId}"  onclick="addToFavorite(${movieId})">add to favorite</a>
                         </div>
                         `
                         trailerBoard.innerHTML = htmlContent
@@ -129,11 +130,11 @@ movieBoard.addEventListener('click', function(event){
                         <div class="box-body col-md-6">
                             <h4><strong>${data.tagline}</strong></h4>
                             <ul class="list-group">
-                                <li class="list-group-item "><strong>Genre:</strong>${genres = data.genres.map(genre => genre.name)}</li>
-                                <li class="list-group-item "><strong>Released:</strong>${data.release_date}</li>
-                                <li class="list-group-item "><strong>Popularity:</strong>${data.popularity}</li>
-                                <li class="list-group-item "><strong>Rating:</strong>${data.vote_average}</li>
-                                <li class="list-group-item "><strong>Runtime</strong>${data.runtime}</li>
+                                <li class="list-group-item "><strong>Genre: </strong>${genres = data.genres.map(genre => genre.name)}</li>
+                                <li class="list-group-item "><strong>Released: </strong>${data.release_date}</li>
+                                <li class="list-group-item "><strong>Popularity: </strong>${data.popularity}</li>
+                                <li class="list-group-item "><strong>Rating: </strong>${data.vote_average}</li>
+                                <li class="list-group-item "><strong>Runtime: </strong>${data.runtime}</li>
                             </ul>
                         </div>
                         <div class="col-md-12">
@@ -143,6 +144,7 @@ movieBoard.addEventListener('click', function(event){
                         <div class="box-footer col-md-12">
                             <a href="http://imdb.com/title/${data.imdb_id}"  class="btn btn-primary" target="_blank">View in IMDB</a>
                             <a href="${trailerSrc}" class="btn btn-primary" target="_blank">View Trailer</a>
+                            <a href="javascript:;" class="btn btn-primary" data-id="${movieId}"  onclick="addToFavorite(${movieId})">add to favorite</a>
                         </div>
                         `
                         trailerBoard.innerHTML = htmlContent
@@ -150,6 +152,28 @@ movieBoard.addEventListener('click', function(event){
             .catch(err => console.log(err))
     }
 })
+
+//addToFavorite
+function addToFavorite(movieId){
+    if(localStorage.getItem('movieId')===null){
+        const idArray = []
+        idArray.push(movieId)
+        localStorage.setItem('movieId', JSON.stringify(idArray))
+        alert('Add to favorite')
+    }else{
+        const idArray = JSON.parse(localStorage.getItem('movieId'))
+        console.log(idArray)
+        if(idArray.includes(movieId)){
+            alert('Already add')
+        }else{
+            idArray.push(movieId)
+            localStorage.setItem('movieId', JSON.stringify(idArray))
+            alert('Add to favorite')
+        }
+    }      
+}
+
+
 //抓預告網址 
 
 function getTrailerSrc(movieId){
@@ -310,3 +334,36 @@ window.onload = function(){
     getTopRated()
 }
 
+//favorite html
+
+function getFavorite(content){
+const idArray = JSON.parse(localStorage.getItem('movieId'))
+let htmlContent = ''
+    idArray.forEach( item => {
+        const path = `/movie/${item}`
+        const url = generateUrl(path)
+        fetch(url)
+            .then(res => res.json())
+            .then(movie => {
+                       console.log(movie)
+                       if(movie.poster_path == null) return
+                else{
+                    htmlContent +=  `
+                    <div class="col-lg-4 col-md-6 text-center contentbox">
+                    <div class=box-header>
+                        <img src="${image_url + movie.poster_path}" alt="">
+                    </div>
+                    <div class=box-body>
+                        <h5>${movie.original_title}</h5>
+                    </div>
+                    <div class="box-footer">
+                        <a href="javascript:;" data-movie-id="${movie.id}" class="btn btn-primary">Remove</a>
+                    </div>
+                </div>
+                     `
+                }
+                content.innerHTML = htmlContent
+            })
+            .catch(err => console.log(err))
+    })
+}
