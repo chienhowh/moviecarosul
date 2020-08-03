@@ -367,3 +367,4 @@ let htmlContent = ''
             .catch(err => console.log(err))
     })
 }
+
